@@ -1,0 +1,8 @@
+github.com/simplylib/errgroup v0.0.3 h1:komdkHZbYASdw5hiK18bFy5sNjIlpictIhhM7jNImfA=
+github.com/simplylib/errgroup v0.0.3/go.mod h1:heSxMihl5llM+feKc5wxj1X5gk75g5bU64T3d09n57k=
+github.com/simplylib/multierror v0.0.1 h1:0lh8T7jcuOx9RL2tdiZJ7PcNhxuFFWIqY7aZaPnBpFQ=
+github.com/simplylib/multierror v0.0.1/go.mod h1:na9RFlzGQKHwZjlfE0guLlmyGsdRuSSksqTeuwEVItQ=
+github.com/simplylib/multierror v0.0.2 h1:72szhIdMVOyyT7cJ9H7BgehRoWe54ELWHbSlQ/f8Z8Y=
+github.com/simplylib/multierror v0.0.2/go.mod h1:na9RFlzGQKHwZjlfE0guLlmyGsdRuSSksqTeuwEVItQ=
+golang.org/x/tools v0.5.0 h1:+bSpV5HIeWkuvgaMfI3UmKRThoTA5ODJTUd8T17NO+4=
+golang.org/x/tools v0.5.0/go.mod h1:N+Kgy78s5I24c24dU8OfWNEotWjutIs8SnJvn5IDq+k=
