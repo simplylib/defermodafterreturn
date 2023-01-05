@@ -25,7 +25,7 @@ func run() (err error) {
 	flag.CommandLine.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(),
 			os.Args[0]+" detects uses of a defer that attempts to modify return values in a function without named returns\n",
-			"\nUsage: "+os.Args[0]+" [flags] <dir>\n\n",
+			"\nUsage: "+os.Args[0]+" [flags] <dir/file>\n\n",
 			"Ex: "+os.Args[0]+" -v -t 8 . // recursively find all go files in current directory and scan for defers\n",
 			"\nFlags:\n",
 		)
@@ -54,9 +54,21 @@ func run() (err error) {
 		return errors.New("expected 1 argument <dir>")
 	}
 
-	err = linter.LintDirectory(ctx, filepath.Clean(flag.Arg(0)), *workers)
+	stat, err := os.Stat(flag.Arg(0))
 	if err != nil {
-		return fmt.Errorf("could not lint directory (%v) error (%w)", flag.Arg(0), err)
+		return fmt.Errorf("could not stat path (%v) error (%w)", flag.Arg(0), err)
+	}
+
+	if stat.IsDir() {
+		err = linter.LintDirectory(ctx, filepath.Clean(flag.Arg(0)), *workers)
+		if err != nil {
+			return fmt.Errorf("could not LintDirectory(%v) error (%w)", flag.Arg(0), err)
+		}
+	} else {
+		err = linter.LintFile(filepath.Clean(flag.Arg(0)))
+		if err != nil {
+			return fmt.Errorf("could not LintFile(%v) error (%w)", flag.Arg(0), err)
+		}
 	}
 
 	return nil
