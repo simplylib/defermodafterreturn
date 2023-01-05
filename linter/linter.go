@@ -33,6 +33,11 @@ func LintFile(path string) (err error) {
 		return fmt.Errorf("could not parse file (%v) due to error (%w)", path, err)
 	}
 
+	/*
+		naive implementation described below:
+		1. find a function declaration or function literal (anonymous functions)
+		2. determine if that function signature contains a 
+	*/
 	ast.Inspect(f, func(n ast.Node) bool {
 		switch x := n.(type) {
 		case *ast.FuncDecl:
