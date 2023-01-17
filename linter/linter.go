@@ -38,7 +38,7 @@ func externalBlockAssignments(block *ast.BlockStmt) ([]*ast.Ident, error) {
 
 				ident, ok := x.Lhs[i].(*ast.Ident)
 				if !ok {
-					err = fmt.Errorf("expected an *ast.Ident on left of := / = instead got (%T)", x.Lhs[0])
+					err = fmt.Errorf("expected an *ast.Ident on left of := / = instead got (%T)", x.Lhs[i])
 					return false
 				}
 
@@ -182,10 +182,11 @@ func LintFile(path string) (err error) {
 				}
 
 				log.Printf(
-					"%v:%v:%v function literal in defer assigns to non-named return in parent function\n%s\n",
+					"%v:%v:%v function literal in defer assigns to (%v) a non-named return in parent function\n%s\n",
 					file.Name(),
 					fset.Position(x.Pos()).Line,
 					fset.Position(x.Pos()).Column,
+					assigns[i].Name,
 					buf.Bytes(),
 				)
 			}
