@@ -149,7 +149,8 @@ func LintFile(path string) (err error) {
 				return true
 			}
 
-			assigns, err := externalBlockAssignments(x.Body)
+			var assigns []*ast.Ident
+			assigns, err = externalBlockAssignments(x.Body)
 			if err != nil {
 				err = fmt.Errorf("could not get externalBlockAssignments (%w)", err)
 				return false
