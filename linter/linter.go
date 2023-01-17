@@ -10,6 +10,7 @@ import (
 	"go/token"
 	"io"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -168,7 +169,7 @@ func LintFile(path string) (err error) {
 					return false
 				}
 
-				fmt.Printf(
+				log.Printf(
 					"%v:%v:%v function literal in defer assigns to non-named return in parent function\n%s\n",
 					file.Name(),
 					fset.Position(x.Pos()).Line,
