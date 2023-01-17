@@ -78,6 +78,18 @@ func externalBlockAssignments(block *ast.BlockStmt) ([]*ast.Ident, error) {
 }
 
 func functionTypeHasNamedVar(f *ast.FuncDecl, name string) bool {
+	if f.Type == nil {
+		return false
+	}
+
+	if f.Type.Results == nil {
+		return false
+	}
+
+	if f.Type.Results.List == nil {
+		return false
+	}
+
 	returns := f.Type.Results.List
 	for i := range returns {
 		if len(returns[i].Names) == 0 {
