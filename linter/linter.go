@@ -95,7 +95,7 @@ func functionTypeHasNamedVar(f *ast.FuncDecl, name string) bool {
 
 func LintFile(path string) (err error) {
 	var file *os.File
-	file, err = os.Open(path)
+	file, err = os.Open(filepath.Clean(path))
 	if err != nil {
 		return fmt.Errorf("could not ReadFile (%v) error (%w)", path, err)
 	}
