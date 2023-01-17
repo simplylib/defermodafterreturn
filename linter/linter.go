@@ -31,21 +31,25 @@ func externalBlockAssignments(block *ast.BlockStmt) ([]*ast.Ident, error) {
 		case *ast.FuncLit:
 		case *ast.DeferStmt:
 		case *ast.AssignStmt:
+		lhs:
 			for i := range x.Lhs {
-				if x.Tok == token.DEFINE {
-					continue
-				}
-
 				ident, ok := x.Lhs[i].(*ast.Ident)
 				if !ok {
-					err = fmt.Errorf("expected an *ast.Ident on left of := / = instead got (%T)", x.Lhs[i])
+					err = fmt.Errorf("expected an *ast.Ident on left of := instead got (%T)", x.Lhs[i])
 					return false
+				}
+
+				if x.Tok == token.DEFINE {
+
+					decls = append(decls, ident)
+					continue
 				}
 
 				for j := range decls {
 					if decls[j].Name != ident.Name {
 						continue
 					}
+					continue lhs
 				}
 
 				assigns = append(assigns, ident)
