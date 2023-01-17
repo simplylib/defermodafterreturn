@@ -76,6 +76,7 @@ func run() (err error) {
 
 func main() {
 	if err := run(); err != nil {
+		log.SetOutput(os.Stderr)
 		log.Fatal(err)
 	}
 }
