@@ -19,11 +19,10 @@ import (
 )
 
 // externalBlockAssignments finds the block assignments made outside of the function body.
-func externalBlockAssignments(block *ast.BlockStmt) ([]*ast.Ident, error) {
+func externalBlockAssignments(block *ast.BlockStmt) []*ast.Ident {
 	var (
 		assigns []*ast.Ident
 		decls   []*ast.Ident
-		err     error
 	)
 	ast.Inspect(block, func(n ast.Node) bool {
 		switch x := n.(type) {
@@ -35,12 +34,10 @@ func externalBlockAssignments(block *ast.BlockStmt) ([]*ast.Ident, error) {
 			for i := range x.Lhs {
 				ident, ok := x.Lhs[i].(*ast.Ident)
 				if !ok {
-					err = fmt.Errorf("expected an *ast.Ident on left of := instead got (%T)", x.Lhs[i])
-					return false
+					continue
 				}
 
 				if x.Tok == token.DEFINE {
-
 					decls = append(decls, ident)
 					continue
 				}
@@ -57,15 +54,13 @@ func externalBlockAssignments(block *ast.BlockStmt) ([]*ast.Ident, error) {
 		case *ast.DeclStmt:
 			genDecl, ok := x.Decl.(*ast.GenDecl)
 			if !ok {
-				err = fmt.Errorf("expected an *ast.GenDecl in *ast.DeclStmt instead got (%T)", x.Decl)
-				return false
+				return true
 			}
 
 			for _, spec := range genDecl.Specs {
 				value, ok := spec.(*ast.ValueSpec)
 				if !ok {
-					err = fmt.Errorf("expected *ast.ValueSpec instead got (%T)", spec)
-					return false
+					continue
 				}
 
 				decls = append(decls, value.Names...)
@@ -74,11 +69,8 @@ func externalBlockAssignments(block *ast.BlockStmt) ([]*ast.Ident, error) {
 
 		return true
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	return assigns, nil
+	return assigns
 }
 
 func functionTypeHasNamedVar(f *ast.FuncDecl, name string) bool {
@@ -162,20 +154,23 @@ func LintFile(path string) (err error) {
 		case *ast.DeferStmt:
 			lastDefer = x
 		case *ast.FuncLit:
+			// check if are we in a defer
 			if lastDefer == nil || x.Pos() < lastDefer.Pos() || x.Pos() > lastDefer.End() {
 				return true
 			}
 
-			var assigns []*ast.Ident
-			assigns, err = externalBlockAssignments(x.Body)
-			if err != nil {
-				err = fmt.Errorf("could not get externalBlockAssignments (%w)", err)
-				return false
-			}
+			globalAssigns := externalBlockAssignments(outsideFunction.Body)
 
-			for i := range assigns {
-				if functionTypeHasNamedVar(outsideFunction, assigns[i].Name) {
+		deferAssignsLoop:
+			for _, assign := range externalBlockAssignments(x.Body) {
+				if functionTypeHasNamedVar(outsideFunction, assign.Name) {
 					continue
+				}
+
+				for _, globalAssign := range globalAssigns {
+					if assign.Name == globalAssign.Name {
+						continue deferAssignsLoop
+					}
 				}
 
 				buf := &bytes.Buffer{}
@@ -190,7 +185,7 @@ func LintFile(path string) (err error) {
 					file.Name(),
 					fset.Position(x.Pos()).Line,
 					fset.Position(x.Pos()).Column,
-					assigns[i].Name,
+					assign.Name,
 					buf.Bytes(),
 				)
 			}
