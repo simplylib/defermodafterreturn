@@ -102,22 +102,11 @@ func functionTypeHasNamedVar(f *ast.FuncDecl, name string) bool {
 	return true
 }
 
-func LintFile(path string) (err error) {
-	var file *os.File
-	file, err = os.Open(filepath.Clean(path))
-	if err != nil {
-		return fmt.Errorf("could not ReadFile (%v) error (%w)", path, err)
-	}
-	defer func() {
-		if err2 := file.Close(); err2 != nil {
-			err = multierror.Append(err, fmt.Errorf("could not close file (%v) due to error (%w)", path, err))
-		}
-	}()
-
+func lintBytes(filename string, bs []byte) (err error) {
 	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, filepath.Base(path), file, 0)
+	f, err := parser.ParseFile(fset, filename, bs, 0)
 	if err != nil {
-		return fmt.Errorf("could not parse file (%v) due to error (%w)", path, err)
+		return fmt.Errorf("could not parse file (%v) due to error (%w)", filename, err)
 	}
 
 	/*
@@ -182,7 +171,7 @@ func LintFile(path string) (err error) {
 
 				log.Printf(
 					"%v:%v:%v function literal in defer assigns to (%v) a non-named return in parent function\n%s\n",
-					file.Name(),
+					filename,
 					fset.Position(x.Pos()).Line,
 					fset.Position(x.Pos()).Column,
 					assign.Name,
@@ -197,9 +186,29 @@ func LintFile(path string) (err error) {
 		return err
 	}
 
-	_ = outsideFunction
-
 	return nil
+}
+
+func LintFile(path string) (err error) {
+	var file *os.File
+	file, err = os.Open(filepath.Clean(path))
+	if err != nil {
+		return fmt.Errorf("could not ReadFile (%v) error (%w)", path, err)
+	}
+
+	defer func() {
+		if err2 := file.Close(); err2 != nil {
+			err = multierror.Append(err, fmt.Errorf("could not close file (%v) due to error (%w)", path, err))
+		}
+	}()
+
+	var bytes []byte
+	bytes, err = io.ReadAll(file)
+	if err != nil {
+		return fmt.Errorf("could not read all bytes from (%v) error (%w)", filepath.Clean(path), err)
+	}
+
+	return lintBytes(path, bytes)
 }
 
 func LintDirectory(ctx context.Context, path string, workers int) (err error) {
