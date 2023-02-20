@@ -102,6 +102,15 @@ func functionTypeHasNamedVar(f *ast.FuncDecl, name string) bool {
 	return true
 }
 
+type assignWithoutNamedReturn struct {
+	name     string
+	position int
+}
+
+func checkFileAsBytes(filename string, bs []byte) []assignWithoutNamedReturn {
+	return nil
+}
+
 func lintBytes(filename string, bs []byte) (err error) {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, filename, bs, 0)
