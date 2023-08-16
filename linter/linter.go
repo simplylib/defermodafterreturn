@@ -3,6 +3,7 @@ package linter
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -15,7 +16,6 @@ import (
 	"path/filepath"
 
 	"github.com/simplylib/errgroup"
-	"github.com/simplylib/multierror"
 )
 
 // externalBlockAssignments finds the block assignments made outside of the function body.
@@ -207,7 +207,7 @@ func LintFile(path string) (err error) {
 
 	defer func() {
 		if err2 := file.Close(); err2 != nil {
-			err = multierror.Append(err, fmt.Errorf("could not close file (%v) due to error (%w)", path, err))
+			err = errors.Join(err, fmt.Errorf("could not close file (%v) due to error (%w)", path, err))
 		}
 	}()
 
