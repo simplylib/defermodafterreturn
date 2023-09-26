@@ -1,10 +1,9 @@
 package testdata
 
 import (
+	"errors"
 	"fmt"
 	"io"
-
-	"github.com/simplylib/multierror"
 )
 
 // GoodFunction copies data from r to w then close w.
@@ -12,8 +11,7 @@ func GoodFunction(w io.WriteCloser, r io.Reader) (n int64, err error) {
 	defer func() {
 		err2 := w.Close()
 		if err2 != nil && err != nil {
-			err = multierror.Append(err, fmt.Errorf("could not close WriteCloser (%w)", err2))
-			// in go1.20+ this can be replaced with fmt.Errorf with two %w verbs
+			err = errors.Join(err, fmt.Errorf("could not close WriteCloser (%w)", err2))
 		}
 	}()
 
